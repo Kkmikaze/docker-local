@@ -1,5 +1,5 @@
 version: '3.1'
-services :
+services:
   postgres:
     image: postgres:10-alpine
     ports:
@@ -8,24 +8,33 @@ services :
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-    volumes: 
+    volumes:
       - ./data/postgres:/var/lib/postgresql/data
+    restart: always
   mysql:
-    image: mariadb
+    image: mysql:8.0
     ports:
       - "3306:3306"
+    command:
+      [
+        '--max_allowed_packet=1GB',
+        '--default-authentication-plugin=mysql_native_password'
+      ]
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
       MYSQL_DATABASE: root
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
     volumes:
       - ./data/mysql:/var/lib/mysql
+    restart: always
   admin:
     image: adminer
     restart: always
-    depends_on: 
+    depends_on:
       - postgres
       - mysql
     ports:
       - 8080:8080
+volumes:
+  mysql:
+    driver: local
