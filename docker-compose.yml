@@ -37,9 +37,25 @@ services:
     environment:
       ADMINER_DESIGN: dracula
       ADMINER_PLUGINS: 'tables-filter tinymce json-column struct-comments table-structure table-indexes-structure frames'
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq-local'
+    ports:
+        - 4369:4369
+        - 5671:5671
+        - 5672:5672
+        - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    volumes:
+      - ./data/rabbitmq/lib:/var/lib/rabbitmq
 
 volumes:
   mysql:
     driver: local
   postgres:
+    driver: local
+
+  rabbitmq:
     driver: local
