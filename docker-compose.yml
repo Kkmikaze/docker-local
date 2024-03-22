@@ -1,6 +1,12 @@
 version: '3.1'
+
 services:
   postgres:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
     image: postgres:10-alpine
     ports:
       - "5432:5432"
@@ -12,6 +18,11 @@ services:
       - ./data/postgres:/var/lib/postgresql/data
     restart: always
   mysql:
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
     image: mysql:8.0
     ports:
       - "3306:3306"
@@ -28,6 +39,11 @@ services:
       - ./data/mysql:/var/lib/mysql
     restart: always
   admin:
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
     network_mode: host
     image: adminer
     restart: always
@@ -37,25 +53,27 @@ services:
     environment:
       ADMINER_DESIGN: dracula
       ADMINER_PLUGINS: 'tables-filter tinymce json-column struct-comments table-structure table-indexes-structure frames'
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: 'rabbitmq-local'
-    ports:
-        - 4369:4369
-        - 5671:5671
-        - 5672:5672
-        - 15672:15672
-    environment:
-      - RABBITMQ_DEFAULT_USER=user
-      - RABBITMQ_DEFAULT_PASS=password
     volumes:
-      - ./data/rabbitmq/lib:/var/lib/rabbitmq
+      - ./data/adminer/0-upload_large_dumps.ini:/etc/php/7.4/cli/conf.d/0-upload_large_dumps.ini
+      - ./data/adminer/0-upload_large_dumps.ini:/etc/php/7.4/fpm/conf.d/0-upload_large_dumps.ini
+  redis:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass password
+    volumes:
+      - ./data/redis:/data
 
 volumes:
   mysql:
     driver: local
   postgres:
     driver: local
-
-  rabbitmq:
+  redis:
     driver: local
